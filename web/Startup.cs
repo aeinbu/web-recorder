@@ -6,25 +6,38 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Web.Storage;
 
 namespace Web
 {
 	public class Startup
 	{
+		private IConfigurationRoot _configuration;
+
+		public Startup(IHostingEnvironment env, ILogger<Startup> logger)
+		{
+			logger.LogInformation($"ConfigurationBasePath={env.ContentRootPath}");
+
+			var configurationBuilder = new ConfigurationBuilder();
+			configurationBuilder.SetBasePath(env.ContentRootPath);
+			configurationBuilder.AddJsonFile("appsettings.json");
+			_configuration = configurationBuilder.Build();
+		}
+
 		// This method gets called by the runtime. Use this method to add services to the container.
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
-			var requestStorePath = "../temp/requests";
-			services.AddScoped<Storage.IRequestStore>(x => new Storage.RequestStore(requestStorePath));
-
-			var responseStorePath = "../temp/responses";
-			services.AddScoped<Storage.IResponseStore>(x => new Storage.ResponseStore(responseStorePath));
-
-			services.AddScoped<Storage.Recorder>();
-			services.AddScoped<Storage.Player>();
+			services.AddOptions();
+			services.Configure<RequestStore.Options>(_configuration.GetSection("RequestStore.Options"));
+			services.Configure<ResponseStore.Options>(_configuration.GetSection("ResponseStore.Options"));
+			services.AddScoped<IRequestStore, RequestStore>();
+			services.AddScoped<IResponseStore, ResponseStore>();
+			services.AddScoped<Recorder>();
+			services.AddScoped<Player>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,9 +54,12 @@ namespace Web
 
 			app.Run(async (context) =>
 			{
+				//TODO: Follow proper middleware patterns!!!
 				await recorder.Handle(context.Request);
-				var responseStream = await player.Handle(context.Request);
-				responseStream.CopyTo(context.Response.Body);
+				using (var responseStream = await player.Handle(context.Request))
+				{
+					responseStream.CopyTo(context.Response.Body);
+				}
 			});
 		}
 

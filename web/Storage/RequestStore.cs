@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Web.Storage
 {
 
 	class RequestStore : IRequestStore
 	{
+		internal class Options
+		{
+			public string RootPath { get; set; }
+		}
+		
 		private const string requestExtension = ".request";
 		private readonly string _rootpath;
 
-		public RequestStore(string rootpath)
+		public RequestStore(IOptions<Options> options)
 		{
-			_rootpath = rootpath;
+			_rootpath = options.Value.RootPath;
 		}
 
 		public async Task Save(IEnumerable<string> payload)
