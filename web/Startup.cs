@@ -28,25 +28,13 @@ namespace web
 
 			app.Run(async (context) =>
 			{
-                var path = context.Request.Path.ToString();
-                var querystring = context.Request.QueryString;
-                var protocol = context.Request.Protocol;    // "HTTP/1.1"
-                var scheme = context.Request.Scheme;        // "https" or https"
-				var method = context.Request.Method;        // "GET", "POST", "PUT", "DELETE" etc
-				var headers = string.Concat(context.Request.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}\r\n"));
-				var body = await ResolveStreamToString(context.Request.Body);
-
-				var response = $"This was the request made:\r\n\r\n{method} {scheme}://servername:port{path}{querystring} {protocol}\r\n{headers}\r\n{body}";
+                var rootpath = "../temp";
+                var store = new Storage.Store(rootpath);
+                await new Storage.Recorder(store).Handle(context.Request);
+				var response = $"Thank you!\r\nYour request was recorded.";
 				await context.Response.WriteAsync(response);
 			});
 		}
 
-		private async Task<string> ResolveStreamToString(Stream stream)
-		{
-			using (var sr = new StreamReader(stream))
-			{
-                return await sr.ReadToEndAsync();
-			}
-		}
 	}
 }
