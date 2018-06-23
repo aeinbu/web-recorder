@@ -16,6 +16,7 @@ Web Recorder starts up two different http endpoints, one for recording all reque
 ### v2
 - proxy
   - records requests and their responses
+  - authentication pass-through
 - replayer
   - can replay responses to requests differing on different paths, querystring, post messages etc
   - some customization of how to select a response to a requests (what to ignore etc)
