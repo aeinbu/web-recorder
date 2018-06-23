@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace web.Storage
+namespace Web.Storage
 {
 	class Recorder
 	{
-		private readonly Store _store;
+		private readonly IRequestStore _store;
 
-		public Recorder(Store Store)
+		public Recorder(IRequestStore Store)
 		{
 			_store = Store;
 		}
