@@ -12,16 +12,16 @@ namespace Middleware.Storage
 			public string RootPath { get; set; }
 		}
 
-		private readonly string _rootpath;
+		private readonly string _rootPath;
 
 		public ResponseStore(IOptions<Options> options)
 		{
-			_rootpath = options.Value.RootPath;
+			_rootPath = options.Value.RootPath;
 		}
 
 		public Task<Stream> Load(string method, string resourcePath)
 		{
-			string filename = Path.Combine(_rootpath, Path.GetFileName(resourcePath));
+			string filename = Path.Combine(_rootPath, Path.GetFileName(resourcePath));
 
 			return File.Exists(filename)
 					? Task.FromResult<Stream>(File.OpenRead(filename))

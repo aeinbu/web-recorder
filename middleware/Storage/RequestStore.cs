@@ -7,49 +7,57 @@ using Microsoft.Extensions.Options;
 
 namespace Middleware.Storage
 {
-
 	public class RequestStore : IRequestStore
 	{
 		public class Options
 		{
 			public string RootPath { get; set; }
 		}
-		
-		private const string requestExtension = ".request";
-		private readonly string _rootpath;
+
+		private readonly string _rootPath;
 
 		public RequestStore(IOptions<Options> options)
 		{
-			_rootpath = options.Value.RootPath;
+			_rootPath = options.Value.RootPath;
 		}
 
-		public async Task Save(IEnumerable<string> payload)
+		public async Task<int> Save(ISerializablePayload payload)
 		{
 			var nextFileNumber = GetHighestFileNumber() + 1 ?? 0;
-			var filename = Path.Combine(_rootpath, $"{nextFileNumber}{requestExtension}");
+			await Save(payload, nextFileNumber);
+			return nextFileNumber;
+		}
 
+		public async Task Save(ISerializablePayload payload, int fileNumber)
+		{
+			var filename = Path.Combine(_rootPath, $"{fileNumber}{payload.Extension}");
 			using (var sw = new StreamWriter(filename))
 			{
-				foreach (var item in payload)
+				foreach (var item in payload.Serialize())
 				{
 					await sw.WriteLineAsync(item);
 				}
 			}
 		}
 
+		private static object _getFileNumberLock = new Object();
+
 		private int? GetHighestFileNumber()
 		{
-			var files = Directory.EnumerateFiles(_rootpath)
-								.Where(file => file.EndsWith(requestExtension))
-								.Select(file => Path.GetFileName(file))
-								.Select(file => file.Substring(0, file.Length - requestExtension.Length));
-
-			if (!files.Any(file => int.TryParse(file, out _)))
+			lock (_getFileNumberLock)
 			{
-				return null;
-			}
+				var files = Directory.EnumerateFiles(_rootPath)
+									.Select(file => Path.GetFileName(file))
+									.Where(file => file.IndexOf('.') > 0)
+									.Select(file => file.Substring(0, file.IndexOf('.')));
 
-			return files.Select(file => int.Parse(file)).Max();
+				if (!files.Any(file => int.TryParse(file, out _)))
+				{
+					return null;
+				}
+
+				return files.Select(file => int.Parse(file)).Max();
+			}
 		}
 	}
 }

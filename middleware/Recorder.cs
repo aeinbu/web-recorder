@@ -1,68 +1,62 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Middleware.Storage;
 
 namespace Middleware
 {
 	public class Recorder
 	{
-		private readonly IRequestStore _store;
+		public class Options
+		{
+			public bool RecordResponses { get; set; }
+		}
+
+		private readonly IRequestStore _requestStore;
+		private readonly IResponseStore _responseStore;
+		private readonly bool _recordResponses;
 		private readonly ILogger<Recorder> _logger;
 
-		public Recorder( IRequestStore store, ILogger<Recorder> logger)
+		public Recorder(IRequestStore requestStore, IOptions<Options> options, ILogger<Recorder> logger)
 		{
-			_store = store;
+			_requestStore = requestStore;
+			_recordResponses = options.Value.RecordResponses;
 			_logger = logger;
 		}
 
-		public async Task RecordRequest(HttpRequest request)
+		public async Task<int> RecordRequest(HttpRequest request)
 		{
-			var path = request.Path.ToString();
-			var querystring = request.QueryString;
-			var protocol = request.Protocol;    // "HTTP/1.1"
-			var scheme = request.Scheme;        // "https" or https"
-			var method = request.Method;        // "GET", "POST", "PUT", "DELETE" etc
-			var headers = request.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}");
-			var body = await ResolveStreamToString(request.Body);
+			var payload = new RequestPayload()
+			{
+				Path = request.Path.ToString(),
+				Querystring = request.QueryString,
+				Protocol = request.Protocol,    // "HTTP/1.1"
+				Scheme = request.Scheme,        // "https" or https"
+				Method = request.Method,        // "GET", "POST", "PUT", "DELETE" etc
+				Headers = request.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}"),
+				Body = await ResolveStreamToString(request.Body)
+			};
 
-			var payload = new List<string>();
-
-			payload.Add($"{method} {scheme}://servername:port{path}{querystring} {protocol}");
-			payload.AddRange(headers);
-			payload.Add("");
-			payload.Add(body);
-			await _store.Save(payload);
+			return await _requestStore.Save(payload);
 		}
 
-		public async Task RecordResponse(HttpResponse response)
+		public async Task RecordResponse(HttpResponse response, int filenumber)
 		{
-			//TODO: ...
-			// var path = response.Path.ToString();
-			// var querystring = response.QueryString;
-			// var protocol = response.Protocol;    // "HTTP/1.1"
-			// var scheme = response.Scheme;        // "https" or https"
-			// var method = response.Method;        // "GET", "POST", "PUT", "DELETE" etc
-			var headers = response.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}");
-			// var body = await ResolveStreamToString(response.Body);
-
-			var payload = new List<string>();
-
-			payload.Add("Recorder::SaveResponse");
-			// payload.Add($"{method} {scheme}://servername:port{path}{querystring} {protocol}");
-			payload.AddRange(headers);
-			payload.Add("");
-			// payload.Add(body);
-			// await _store.Save(payload);
-
-			var diagnosticsString = new StringBuilder();
-			payload.ForEach(line => diagnosticsString.AppendLine(line));
-			_logger.LogInformation(diagnosticsString.ToString());
+			if (_recordResponses)
+			{
+				var payload = new ResponsePayload(){
+					Protocol = "//TODO: PROTOCOL", //response.Protocol,
+					StatusCode = response.StatusCode,
+					StatusMessage = "TODO:// STATUSMESSAGE", //response.StatusMessage,
+					Headers = response.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}")
+				};
+				await _requestStore.Save(payload, filenumber);
+			}
 		}
 
 		private async Task<string> ResolveStreamToString(Stream stream)

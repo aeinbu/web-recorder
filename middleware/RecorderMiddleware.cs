@@ -14,16 +14,12 @@ namespace Middleware
 
 		public async Task InvokeAsync(HttpContext context, Recorder recorder)
 		{
-			await recorder.RecordRequest(context.Request);
+			int filenumber = await recorder.RecordRequest(context.Request);
 
 			// Call the next delegate/middleware in the pipeline
 			await _next(context);
 
-			//TODO: Only record response when configured to...
-			if (true)
-			{
-				await recorder.RecordResponse(context.Response);
-			}
+			await recorder.RecordResponse(context.Response, filenumber);
 		}
 	}
 }

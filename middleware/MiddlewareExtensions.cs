@@ -9,7 +9,8 @@ namespace Middleware
 	{
 		public static void ConfigureRecorder(this IServiceCollection services, IConfigurationRoot configuration)
 		{
-			services.Configure<RequestStore.Options>(configuration.GetSection("RequestStore.Options"));
+			services.Configure<RequestStore.Options>(configuration.GetSection("RequestStore"));
+			services.Configure<Recorder.Options>(configuration.GetSection("Recorder"));
 			services.AddScoped<IRequestStore, RequestStore>();
 			services.AddScoped<RecorderMiddleware>();
 			services.AddScoped<Recorder>();
@@ -17,7 +18,7 @@ namespace Middleware
 
 		public static void ConfigurePlayer(this IServiceCollection services, IConfigurationRoot configuration)
 		{
-			services.Configure<ResponseStore.Options>(configuration.GetSection("ResponseStore.Options"));
+			services.Configure<ResponseStore.Options>(configuration.GetSection("ResponseStore"));
 			services.AddScoped<IResponseStore, ResponseStore>();
 			services.AddScoped<PlayerMiddleware>();
 			services.AddScoped<Player>();
