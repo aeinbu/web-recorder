@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Middleware.Storage;
@@ -17,14 +18,13 @@ namespace Middleware
 			public bool RecordResponses { get; set; }
 		}
 
-		private readonly IRequestStore _requestStore;
-		private readonly IResponseStore _responseStore;
+		private readonly IRecorderStore _store;
 		private readonly bool _recordResponses;
 		private readonly ILogger<Recorder> _logger;
 
-		public Recorder(IRequestStore requestStore, IOptions<Options> options, ILogger<Recorder> logger)
+		public Recorder(IRecorderStore store, IOptions<Options> options, ILogger<Recorder> logger)
 		{
-			_requestStore = requestStore;
+			_store = store;
 			_recordResponses = options.Value.RecordResponses;
 			_logger = logger;
 		}
@@ -42,7 +42,7 @@ namespace Middleware
 				Body = await ResolveStreamToString(request.Body)
 			};
 
-			return await _requestStore.Save(payload);
+			return await _store.Save(payload);
 		}
 
 		public async Task RecordResponse(HttpResponse response, int filenumber)
@@ -50,12 +50,13 @@ namespace Middleware
 			if (_recordResponses)
 			{
 				var payload = new ResponsePayload(){
-					Protocol = "//TODO: PROTOCOL", //response.Protocol,
+					Protocol = response.HttpContext.Request.Protocol,
 					StatusCode = response.StatusCode,
-					StatusMessage = "TODO:// STATUSMESSAGE", //response.StatusMessage,
+					//TODO: How to get the reason phrase?
+					ReasonPhrase = response.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase ?? "<Unknown reason phrase>",
 					Headers = response.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}")
 				};
-				await _requestStore.Save(payload, filenumber);
+				await _store.Save(payload, filenumber);
 			}
 		}
 

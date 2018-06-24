@@ -9,17 +9,17 @@ namespace Middleware
 	{
 		public static void ConfigureRecorder(this IServiceCollection services, IConfigurationRoot configuration)
 		{
-			services.Configure<RequestStore.Options>(configuration.GetSection("RequestStore"));
+			services.Configure<RecorderStore.Options>(configuration.GetSection("RecorderStore"));
 			services.Configure<Recorder.Options>(configuration.GetSection("Recorder"));
-			services.AddScoped<IRequestStore, RequestStore>();
+			services.AddScoped<IRecorderStore, RecorderStore>();
 			services.AddScoped<RecorderMiddleware>();
 			services.AddScoped<Recorder>();
 		}
 
 		public static void ConfigurePlayer(this IServiceCollection services, IConfigurationRoot configuration)
 		{
-			services.Configure<ResponseStore.Options>(configuration.GetSection("ResponseStore"));
-			services.AddScoped<IResponseStore, ResponseStore>();
+			services.Configure<PlayerStore.Options>(configuration.GetSection("PlayerStore"));
+			services.AddScoped<IPlayerStore, PlayerStore>();
 			services.AddScoped<PlayerMiddleware>();
 			services.AddScoped<Player>();
 		}

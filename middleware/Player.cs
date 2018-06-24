@@ -8,10 +8,10 @@ namespace Middleware
 {
 	public class Player
 	{
-		private readonly IResponseStore _storage;
+		private readonly IPlayerStore _storage;
 		private readonly ILogger<PlayerMiddleware> _logger;
 
-		public Player(IResponseStore storage, ILogger<PlayerMiddleware> logger)
+		public Player(IPlayerStore storage, ILogger<PlayerMiddleware> logger)
 		{
 			_storage = storage;
 			_logger = logger;

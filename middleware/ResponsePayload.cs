@@ -8,7 +8,7 @@ namespace Middleware
 
 		public string Protocol { get; set; }
 		public int StatusCode { get; set; }
-		public object StatusMessage { get; set; }
+		public object ReasonPhrase { get; set; }
 		public IEnumerable<string> Headers { get; set; }
 		public string Body { get; set; }
 
@@ -23,7 +23,7 @@ namespace Middleware
 			// Transfer-Encoding: chunked
 
 			var payload = new List<string>();
-			payload.Add($"{Protocol} {StatusCode} {StatusMessage}");
+			payload.Add($"{Protocol} {StatusCode} {ReasonPhrase}");
 			payload.AddRange(Headers);
 			payload.Add("");
 			payload.Add(Body);

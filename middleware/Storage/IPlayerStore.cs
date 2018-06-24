@@ -1,10 +1,9 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace Middleware.Storage
 {
-	//TODO: rename to IPlayerStore
-	public interface IResponseStore
+	public interface IPlayerStore
 	{
 		Task<Stream> Load(string method, string path);
 	}

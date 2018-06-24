@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Middleware.Storage
 {
-	public class RequestStore : IRequestStore
+	public class RecorderStore : IRecorderStore
 	{
 		public class Options
 		{
@@ -16,7 +16,7 @@ namespace Middleware.Storage
 
 		private readonly string _rootPath;
 
-		public RequestStore(IOptions<Options> options)
+		public RecorderStore(IOptions<Options> options)
 		{
 			_rootPath = options.Value.RootPath;
 		}

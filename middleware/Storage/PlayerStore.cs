@@ -1,11 +1,11 @@
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
 namespace Middleware.Storage
 {
 
-	public class ResponseStore : IResponseStore
+	public class PlayerStore : IPlayerStore
 	{
 		public class Options
 		{
@@ -14,7 +14,7 @@ namespace Middleware.Storage
 
 		private readonly string _rootPath;
 
-		public ResponseStore(IOptions<Options> options)
+		public PlayerStore(IOptions<Options> options)
 		{
 			_rootPath = options.Value.RootPath;
 		}

@@ -1,10 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Middleware.Storage
 {
-	//TODO: rename to IRecorderStore
-	public interface IRequestStore
+	public interface IRecorderStore
 	{
 		Task<int> Save(ISerializablePayload payload);
 		Task Save(ISerializablePayload payload, int filenumber);
