@@ -11,6 +11,7 @@ namespace Middleware
 		{
 			services.Configure<RequestStore.Options>(configuration.GetSection("RequestStore.Options"));
 			services.AddScoped<IRequestStore, RequestStore>();
+			services.AddScoped<RecorderMiddleware>();
 			services.AddScoped<Recorder>();
 		}
 
@@ -18,17 +19,18 @@ namespace Middleware
 		{
 			services.Configure<ResponseStore.Options>(configuration.GetSection("ResponseStore.Options"));
 			services.AddScoped<IResponseStore, ResponseStore>();
+			services.AddScoped<PlayerMiddleware>();
 			services.AddScoped<Player>();
 		}
 
 		public static IApplicationBuilder UseRecorder(this IApplicationBuilder builder)
 		{
-			return builder.UseMiddleware<Recorder>();
+			return builder.UseMiddleware<RecorderMiddleware>();
 		}
 
 		public static IApplicationBuilder UsePlayer(this IApplicationBuilder builder)
 		{
-			return builder.UseMiddleware<Player>();
+			return builder.UseMiddleware<PlayerMiddleware>();
 		}
 	}
 }

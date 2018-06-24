@@ -8,27 +8,26 @@ namespace Middleware
 {
 	public class Player
 	{
-		private readonly RequestDelegate _next;
+		private readonly IResponseStore _storage;
+		private readonly ILogger<PlayerMiddleware> _logger;
 
-		public Player(RequestDelegate next)
+		public Player(IResponseStore storage, ILogger<PlayerMiddleware> logger)
 		{
-			_next = next;
+			_storage = storage;
+			_logger = logger;
 		}
 
-		public async Task InvokeAsync(HttpContext context, IResponseStore storage)
+		public async Task<bool> Play(HttpRequest request, HttpResponse response)
 		{
-			using (Stream responseStream = await storage.Load(context.Request.Method, context.Request.Path))
+			using (Stream responseStream = await _storage.Load(request.Method, request.Path))
 			{
 				if (responseStream == null)
 				{
-					//TODO: Change this to a seperate middleware? Or use existing one?
-					await context.Response.WriteAsync("Thank you! Your request was recorded...");
-
-					// await _next(context);
-					return;
+					return false;
 				}
 
-				responseStream.CopyTo(context.Response.Body);
+				responseStream.CopyTo(response.Body);
+				return true;
 			}
 		}
 	}
