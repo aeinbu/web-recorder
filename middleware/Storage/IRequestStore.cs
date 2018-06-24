@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Web.Storage
+namespace Middleware.Storage
 {
-	interface IRequestStore
+	public interface IRequestStore
 	{
 		Task Save(IEnumerable<string> payload);
 	}

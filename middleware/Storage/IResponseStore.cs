@@ -1,9 +1,9 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Web.Storage
+namespace Middleware.Storage
 {
-	interface IResponseStore
+	public interface IResponseStore
 	{
 		Task<Stream> Load(string method, string path);
 	}

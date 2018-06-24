@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Web.Storage;
+using Middleware;
+using Middleware.Storage;
 
 namespace Web
 {
@@ -49,12 +50,15 @@ namespace Web
 			}
 
 			//TODO: Resolve middleware inside app.Run?
-			var recorder = services.GetService<Storage.Recorder>();
-			var player = services.GetService<Storage.Player>();
+			var recorder = services.GetService<Recorder>();
+			var player = services.GetService<Player>();
 
+			//TODO: Follow proper middleware patterns!!!
+			// app.Use(recorder.Handle???);
+			// app.Use(player.Handle???);
+			
 			app.Run(async (context) =>
 			{
-				//TODO: Follow proper middleware patterns!!!
 				await recorder.Handle(context.Request);
 				using (var responseStream = await player.Handle(context.Request))
 				{

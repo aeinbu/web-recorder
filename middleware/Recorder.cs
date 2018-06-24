@@ -3,10 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Middleware.Storage;
 
-namespace Web.Storage
+namespace Middleware
 {
-	class Recorder
+	public class Recorder
 	{
 		private readonly IRequestStore _store;
 

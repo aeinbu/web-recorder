@@ -5,12 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-namespace Web.Storage
+namespace Middleware.Storage
 {
 
-	class RequestStore : IRequestStore
+	public class RequestStore : IRequestStore
 	{
-		internal class Options
+		public class Options
 		{
 			public string RootPath { get; set; }
 		}

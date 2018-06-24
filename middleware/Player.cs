@@ -2,10 +2,11 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Middleware.Storage;
 
-namespace Web.Storage
+namespace Middleware
 {
-	class Player
+	public class Player
 	{
 		private readonly IResponseStore _storage;
 		private readonly ILogger _logger;

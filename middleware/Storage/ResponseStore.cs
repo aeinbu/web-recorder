@@ -2,12 +2,12 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-namespace Web.Storage
+namespace Middleware.Storage
 {
 
-	class ResponseStore : IResponseStore
+	public class ResponseStore : IResponseStore
 	{
-		internal class Options
+		public class Options
 		{
 			public string RootPath { get; set; }
 		}
