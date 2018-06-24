@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,15 +10,16 @@ namespace Middleware
 {
 	public class Recorder
 	{
-		private readonly IRequestStore _store;
+		private RequestDelegate _next;
 
-		public Recorder(IRequestStore Store)
+		public Recorder(RequestDelegate next)
 		{
-			_store = Store;
+			_next = next;
 		}
 
-		public async Task Handle(HttpRequest request)
-		{
+		public async Task InvokeAsync(HttpContext context, IRequestStore store)
+        {
+			var request = context.Request;
 			var path = request.Path.ToString();
 			var querystring = request.QueryString;
 			var protocol = request.Protocol;    // "HTTP/1.1"
@@ -32,8 +34,11 @@ namespace Middleware
 			payload.AddRange(headers);
 			payload.Add("");
 			payload.Add(body);
-			await _store.Save(payload);
-		}
+			await store.Save(payload);
+
+            // Call the next delegate/middleware in the pipeline
+            await _next(context);
+        }
 
 		private async Task<string> ResolveStreamToString(Stream stream)
 		{
@@ -42,6 +47,5 @@ namespace Middleware
 				return await sr.ReadToEndAsync();
 			}
 		}
-
 	}
 }

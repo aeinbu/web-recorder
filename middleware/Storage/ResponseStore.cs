@@ -23,7 +23,9 @@ namespace Middleware.Storage
 		{
 			string filename = Path.Combine(_rootpath, Path.GetFileName(resourcePath));
 
-			return Task.FromResult<Stream>(File.OpenRead(filename));
+			return File.Exists(filename)
+					? Task.FromResult<Stream>(File.OpenRead(filename))
+					: Task.FromResult<Stream>(null);
 		}
 	}
 }

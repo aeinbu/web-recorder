@@ -33,12 +33,10 @@ namespace Web
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddOptions();
-			services.Configure<RequestStore.Options>(_configuration.GetSection("RequestStore.Options"));
-			services.Configure<ResponseStore.Options>(_configuration.GetSection("ResponseStore.Options"));
-			services.AddScoped<IRequestStore, RequestStore>();
-			services.AddScoped<IResponseStore, ResponseStore>();
-			services.AddScoped<Recorder>();
-			services.AddScoped<Player>();
+
+			//TODO: Find more elegant way for configuring...
+			services.ConfigureRecorder(_configuration);
+			services.ConfigurePlayer(_configuration);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,22 +47,14 @@ namespace Web
 				app.UseDeveloperExceptionPage();
 			}
 
-			//TODO: Resolve middleware inside app.Run?
-			var recorder = services.GetService<Recorder>();
-			var player = services.GetService<Player>();
-
-			//TODO: Follow proper middleware patterns!!!
-			// app.Use(recorder.Handle???);
-			// app.Use(player.Handle???);
+			app.UseRecorder();
+			app.UsePlayer();
 			
-			app.Run(async (context) =>
-			{
-				await recorder.Handle(context.Request);
-				using (var responseStream = await player.Handle(context.Request))
-				{
-					responseStream.CopyTo(context.Response.Body);
-				}
-			});
+			// app.Run(async (context) =>
+			// {
+			// 	//TODO: Make a middleware for default response!? Or have a default response from Player? Or use existing middleware...
+			// 	await context.Response.WriteAsync("Thank you! Your request was recorded...");
+			// });
 		}
 
 	}
