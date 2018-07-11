@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Middleware
 {
 	public interface ISerializablePayload
 	{
-		string Extension { get; }
-		IEnumerable<string> Serialize();
+		IEnumerable<(Func<Stream, Task> Serialize, string Extension)> GetSerializers();
 	}
 }

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
 namespace Middleware
@@ -15,17 +18,27 @@ namespace Middleware
 		public IEnumerable<string> Headers { get; set; }
 		public string Body { get; set; }
 
-		IEnumerable<string> ISerializablePayload.Serialize() => Serialize();
-		public List<string> Serialize()
+		IEnumerable<(Func<Stream, Task> Serialize, string Extension)> ISerializablePayload.GetSerializers()
 		{
-			var payload = new List<string>();
+			async Task Serialize(Stream targetStream)
+			{
+				var payload = new List<string>();
 
-			payload.Add($"{Method} {Scheme}://servername:port{Path}{Querystring} {Protocol}");
-			payload.AddRange(Headers);
-			payload.Add("");
-			payload.Add(Body);
+				payload.Add($"{Method} {Scheme}://servername:port{Path}{Querystring} {Protocol}");
+				payload.AddRange(Headers);
+				payload.Add("");
+				payload.Add(Body);
 
-			return payload;
+				using (var sw = new StreamWriter(targetStream))
+				{
+					foreach (var item in payload)
+					{
+						await sw.WriteLineAsync(item);
+					}
+				}
+			};
+
+			yield return (Serialize, Extension);
 		}
 	}
 }
