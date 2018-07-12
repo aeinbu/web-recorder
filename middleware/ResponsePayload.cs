@@ -14,26 +14,22 @@ namespace Middleware
 		public int StatusCode { get; set; }
 		public object ReasonPhrase { get; set; }
 		public IEnumerable<string> Headers { get; set; }
-		public string Body { get; set; }
+		public Stream Body { get; set; }
 
 		IEnumerable<ISerializablePayloadPart> ISerializablePayload.GetSerializableParts()
 		{
-			//TODO:
-			// -- sample response source --
-			// HTTP/1.1 200 OK
-			// Date: Sun, 24 Jun 2018 12:34:54 GMT
-			// Server: Kestrel
-			// Transfer-Encoding: chunked
-
 			var responsePayload = new List<string>();
 			responsePayload.Add($"{Protocol} {StatusCode} {ReasonPhrase}");
 			responsePayload.AddRange(Headers);
-
 			yield return new SerializableTextPayloadPart(ResponseExtension, responsePayload);
-			if (!string.IsNullOrEmpty(Body))
+
+			using (var ms = new MemoryStream())
 			{
-				yield return new SerializableTextPayloadPart(ResponseBodyExtension, Body);
-				// yield return new SerializableBinaryPayloadPart(ResponseBodyExtension, Body);
+				Body.CopyTo(ms);
+				if (ms.Length > 0)
+				{
+					yield return new SerializableBinaryPayloadPart(ResponseBodyExtension, ms);
+				}
 			}
 		}
 	}
