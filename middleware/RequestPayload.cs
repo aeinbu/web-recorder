@@ -17,21 +17,23 @@ namespace Middleware
 		public string Scheme { get; set; }
 		public string Method { get; set; }
 		public IEnumerable<string> Headers { get; set; }
-		public string Body { get; set; }
+		public Stream Body { get; set; }
 
 		IEnumerable<ISerializablePayloadPart> ISerializablePayload.GetSerializableParts()
 		{
 			var payload = new List<string>();
 			payload.Add($"{Method} {Scheme}://servername:port{Path}{Querystring} {Protocol}");
 			payload.AddRange(Headers);
-			// payload.Add("");
-			// payload.Add(Body);
-
 			yield return new SerializableTextPayloadPart(RequestExtension, payload);
-			if (!string.IsNullOrEmpty(Body))
+			
+			using (var ms = new MemoryStream())
 			{
-				yield return new SerializableTextPayloadPart(RequestBodyExtension, Body);
-				// yield return new SerializableBinaryPayloadPart(RequestBodyExtension, Body);
+				Body.CopyTo(ms);
+
+				if (ms.Length > 0)
+				{
+					yield return new SerializableBinaryPayloadPart(RequestBodyExtension, ms);
+				}
 			}
 		}
 	}

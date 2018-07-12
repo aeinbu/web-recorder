@@ -39,7 +39,7 @@ namespace Middleware
 				Scheme = request.Scheme,        // "https" or https"
 				Method = request.Method,        // "GET", "POST", "PUT", "DELETE" etc
 				Headers = request.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}"),
-				Body = await ResolveStreamToString(request.Body)
+				Body = request.Body
 			};
 
 			return await _store.Save(payload);
@@ -54,17 +54,10 @@ namespace Middleware
 					StatusCode = response.StatusCode,
 					//TODO: How to get the reason phrase?
 					ReasonPhrase = response.HttpContext.Features.Get<IHttpResponseFeature>().ReasonPhrase ?? "<Unknown reason phrase>",
-					Headers = response.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}")
+					Headers = response.Headers.Select(hdr => $"{hdr.Key}: {hdr.Value}"),
+					Body = response.Body
 				};
 				await _store.Save(payload, filenumber);
-			}
-		}
-
-		private async Task<string> ResolveStreamToString(Stream stream)
-		{
-			using (var sr = new StreamReader(stream))
-			{
-				return await sr.ReadToEndAsync();
 			}
 		}
 	}
