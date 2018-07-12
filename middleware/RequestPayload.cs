@@ -8,7 +8,8 @@ namespace Middleware
 {
 	public class RequestPayload : ISerializablePayload
 	{
-		public string Extension => ".request";
+		public string RequestExtension => ".request";
+		public string RequestBodyExtension => ".request.body";
 
 		public string Path { get; set; }
 		public QueryString Querystring { get; set; }
@@ -18,27 +19,20 @@ namespace Middleware
 		public IEnumerable<string> Headers { get; set; }
 		public string Body { get; set; }
 
-		IEnumerable<(Func<Stream, Task> Serialize, string Extension)> ISerializablePayload.GetSerializers()
+		IEnumerable<ISerializablePayloadPart> ISerializablePayload.GetSerializableParts()
 		{
-			async Task Serialize(Stream targetStream)
+			var payload = new List<string>();
+			payload.Add($"{Method} {Scheme}://servername:port{Path}{Querystring} {Protocol}");
+			payload.AddRange(Headers);
+			// payload.Add("");
+			// payload.Add(Body);
+
+			yield return new SerializableTextPayloadPart(RequestExtension, payload);
+			if (!string.IsNullOrEmpty(Body))
 			{
-				var payload = new List<string>();
-
-				payload.Add($"{Method} {Scheme}://servername:port{Path}{Querystring} {Protocol}");
-				payload.AddRange(Headers);
-				payload.Add("");
-				payload.Add(Body);
-
-				using (var sw = new StreamWriter(targetStream))
-				{
-					foreach (var item in payload)
-					{
-						await sw.WriteLineAsync(item);
-					}
-				}
-			};
-
-			yield return (Serialize, Extension);
+				yield return new SerializableTextPayloadPart(RequestBodyExtension, Body);
+				// yield return new SerializableBinaryPayloadPart(RequestBodyExtension, Body);
+			}
 		}
 	}
 }

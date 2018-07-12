@@ -30,7 +30,7 @@ namespace Middleware.Storage
 
 		public async Task Save(ISerializablePayload payload, int fileNumber)
 		{
-			foreach (var serializer in payload.GetSerializers())
+			foreach (var serializer in payload.GetSerializableParts())
 			{
 				var path = Path.Combine(_rootPath, $"{fileNumber}{serializer.Extension}");
 				using(var targetStream = File.Open(path, FileMode.Create))
