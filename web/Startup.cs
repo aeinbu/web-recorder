@@ -37,6 +37,7 @@ namespace Web
 			//TODO: Find more elegant way for configuring...
 			services.ConfigureRecorder(_configuration);
 			services.ConfigurePlayer(_configuration);
+			services.ConfigureHttpProxy(_configuration);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,12 +50,13 @@ namespace Web
 
 			app.UseRecorder();
 			app.UsePlayer();
+			app.UseHttpProxy();
 			
-			app.Run(async (context) =>
-			{
-				//TODO: Make a middleware for default response!? Or have a default response from Player? Or use existing middleware...
-				await context.Response.WriteAsync("app.Run: Thank you! Your request was recorded...");
-			});
+			// app.Run(async (context) =>
+			// {
+			// 	//TODO: Make a middleware for default response!? Or have a default response from Player? Or use existing middleware...
+			// 	await context.Response.WriteAsync("app.Run: Thank you! Your request was recorded...");
+			// });
 		}
 
 	}

@@ -24,6 +24,11 @@ namespace Middleware
 			services.AddScoped<Player>();
 		}
 
+		public static void ConfigureHttpProxy(this IServiceCollection services, IConfigurationRoot configuration)
+		{
+			services.AddScoped<HttpProxyMiddleware>();
+		}
+
 		public static IApplicationBuilder UseRecorder(this IApplicationBuilder builder)
 		{
 			return builder.UseMiddleware<RecorderMiddleware>();
@@ -32,6 +37,11 @@ namespace Middleware
 		public static IApplicationBuilder UsePlayer(this IApplicationBuilder builder)
 		{
 			return builder.UseMiddleware<PlayerMiddleware>();
+		}
+		
+		public static IApplicationBuilder UseHttpProxy(this IApplicationBuilder builder)
+		{
+			return builder.UseMiddleware<HttpProxyMiddleware>();
 		}
 	}
 }

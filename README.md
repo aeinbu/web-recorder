@@ -11,12 +11,15 @@ Web Recorder starts up two different http endpoints, one for recording all reque
 - http endpoint(s)
   - records request path, querystring, verbs, headers, post/payload etc
   - can respond with predefined messages
+- proxy
+  - records requests and their responses
+- player
+  - basic implementation
 
 ### vNext
 - proxy
-  - records requests and their responses
   - authentication pass-through
-- replayer
+- player
   - can replay responses to requests differing on different paths, querystring, post messages etc
   - some customization of how to select a response to a requests (what to ignore etc)
 - WebUI
