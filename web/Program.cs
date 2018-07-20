@@ -19,9 +19,9 @@ namespace Web
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureLogging(loggingBuilder => {
-                    loggingBuilder.ClearProviders();
-                    loggingBuilder.AddDebug();
+                .ConfigureLogging((hostingContext, loggingBuilder) => {
+                    // TODO: can i do this in Startup.cs?
+                    loggingBuilder.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                 })
                 .UseStartup<Startup>();
     }

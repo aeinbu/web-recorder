@@ -48,15 +48,15 @@ namespace Web
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseRecorder();
-			app.UsePlayer();
+			// app.UseRecorder();
+			// app.UsePlayer();
 			app.UseHttpProxy();
 			
-			// app.Run(async (context) =>
-			// {
-			// 	//TODO: Make a middleware for default response!? Or have a default response from Player? Or use existing middleware...
-			// 	await context.Response.WriteAsync("app.Run: Thank you! Your request was recorded...");
-			// });
+			app.Run(async (context) =>
+			{
+				//TODO: Make a middleware for default response!? Or have a default response from Player? Or use existing middleware...
+				await context.Response.WriteAsync("app.Run: Thank you! Your request was recorded...");
+			});
 		}
 
 	}
