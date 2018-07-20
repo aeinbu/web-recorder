@@ -15,6 +15,8 @@ namespace Middleware.Storage
 		}
 
 		private readonly string _rootPath;
+		private static int? _nextFreeFileNumber = null;	//NOTE: this is a shared resource. Remember to lock when manipulating
+		private static object _getNextFreeFileNumberLock = new Object();
 
 		public RecorderStore(IOptions<Options> options)
 		{
@@ -23,7 +25,7 @@ namespace Middleware.Storage
 
 		public async Task<int> Save(ISerializablePayload payload)
 		{
-			var nextFileNumber = GetHighestFileNumber() + 1 ?? 0;
+			var nextFileNumber = GetNewFileNumber();
 			await Save(payload, nextFileNumber);
 			return nextFileNumber;
 		}
@@ -33,31 +35,39 @@ namespace Middleware.Storage
 			foreach (var serializer in payload.GetSerializableParts())
 			{
 				var path = Path.Combine(_rootPath, $"{fileNumber}{serializer.Extension}");
-				using(var targetStream = File.Open(path, FileMode.Create))
+				using (var targetStream = File.Open(path, FileMode.Create))
 				{
 					await serializer.Serialize(targetStream);
 				}
 			}
 		}
 
-		private static object _getFileNumberLock = new Object();
-
-		private int? GetHighestFileNumber()
+		private int GetNewFileNumber()
 		{
-			lock (_getFileNumberLock)
+			lock (_getNextFreeFileNumberLock)
 			{
-				var files = Directory.EnumerateFiles(_rootPath)
-									.Select(file => Path.GetFileName(file))
-									.Where(file => file.IndexOf('.') > 0)
-									.Select(file => file.Substring(0, file.IndexOf('.')));
-
-				if (!files.Any(file => int.TryParse(file, out _)))
+				if (!_nextFreeFileNumber.HasValue)
 				{
-					return null;
+					_nextFreeFileNumber = GetHighestUsedFileNumber() ?? 0;
 				}
 
-				return files.Select(file => int.Parse(file)).Max();
+				return (int)_nextFreeFileNumber++;
 			}
+		}
+
+		private int? GetHighestUsedFileNumber()
+		{
+			var files = Directory.EnumerateFiles(_rootPath)
+								.Select(file => Path.GetFileName(file))
+								.Where(file => file.IndexOf('.') > 0)
+								.Select(file => file.Substring(0, file.IndexOf('.')));
+
+			if (!files.Any(file => int.TryParse(file, out _)))
+			{
+				return null;
+			}
+
+			return files.Select(file => int.Parse(file)).Max();
 		}
 	}
 }
